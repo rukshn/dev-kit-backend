@@ -1,8 +1,38 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 const app = express();
 const port = 3000;
 app.use(cors());
+
+dotenv.config();
+const clientId = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
+
+app.get("/login/github", (req, res) => {
+  res.redirect(
+    `https://github.com/login/oauth/authorize?client_id=${clientId}&login=swisstph&scope=repo&redirect=http://localhost:3000/auth/github/callback`,
+  );
+});
+
+app.get("/auth/github/callback", function (req, res) {
+  // Successful authentication, redirect home.
+  console.log(req.query.code);
+  const fetchToken = fetch("https://github.com/login/oauth/access_token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: req.query.code,
+    }),
+  })
+    .then((response) => response.json())
+    .then((json) => res.json(json));
+});
 
 app.get("/", async (req, res) => {
   const url =
