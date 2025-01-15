@@ -31,7 +31,11 @@ app.get("/auth/github/callback", function (req, res) {
     }),
   })
     .then((response) => response.json())
-    .then((json) => res.json(json));
+    .then((json) =>
+      res.redirect(
+        `http://localhost:5173?access_token=${json.access_token}&expires_in=${json.expires_in}&refresh_token=${json.refresh_token}&refresh_token_expires_in=${json.refresh_token_expires_in}`,
+      ),
+    );
 });
 
 app.get("/", async (req, res) => {
